@@ -1,6 +1,7 @@
 <?php
 
 satxmlsv33(false, "", "", "");
+print_r("XML creado de manera satisfactoria!!!!\n");
 
 function satxmlsv33($arr, $edidata=false, $dir="", $nodo="", $addenda=""){
 	global $xml, $cadena_original, $sello, $texto, $ret;
@@ -14,16 +15,16 @@ function satxmlsv33($arr, $edidata=false, $dir="", $nodo="", $addenda=""){
 
 function satxmlsv33_genera_xml($arr, $edidata, $dir, $nodo, $addenda){
 	global $xml, $ret;
-	$xml = new DOMDocument("1.0", "UTF-8");
+	$xml = new DOMdocument("1.0","UTF-8");
 	satxmlsv33_generales($arr, $edidata, $dir, $nodo, $addenda);
-	santxmlv33_relacionados($arr, $edidata, $dir, $nodo, $addenda);
+	satxmlsv33_relacionados($arr, $edidata, $dir, $nodo, $addenda);
 	satxmlsv33_emisor($arr, $edidata, $dir, $nodo, $addenda);
 	satxmlsv33_receptor($arr, $edidata, $dir, $nodo, $addenda);
 	satxmlsv33_conceptos($arr, $edidata, $dir, $nodo, $addenda);
 	satxmlsv33_impuestos($arr, $edidata, $dir, $nodo, $addenda);
 }
 
-function satxmlv33_generales($arr, $edidata, $dir, $nodo, $addenda){
+function satxmlsv33_generales($arr, $edidata, $dir, $nodo, $addenda){
 	global $root, $xml;
 	$root = $xml->createElement("cfdi:Comprobante");
 	$root = $xml->appendChild($root);
@@ -57,11 +58,11 @@ function satxmlv33_generales($arr, $edidata, $dir, $nodo, $addenda){
 
 function satxmlsv33_relacionados($arr, $edidata, $dir, $nodo, $addenda){
 	global $root, $xml;
-	$cfdis = $xml-createElement("cfdi:CfdiRelacionados");
+	$cfdis = $xml->createElement("cfdi:CfdiRelacionados");
 	$cfdis = $root->appendChild($cfdis);
 	satxmlsv33_cargaAtt($cfdis, array("TipoRelacion"=>"01"));
 	$cfdi = $xml->createElement("cfdi:Relacionado");
-	$cfdi = $cfdis-ZappendChild($cfdi);
+	$cfdi = $cfdis->appendChild($cfdi);
 	satxmlsv33_cargaAtt($cfdi, array("UUID"=>""));
 }
 
@@ -79,7 +80,7 @@ function satxmlsv33_receptor($attr, $edidata, $dir, $nodo, $addenda){
 	global $root, $xml;
 	$receptor = $xml->createElement("cfdi:Receptor");
 	$receptor = $root->appendChild($receptor);
-	satcmlsv33_cargaAtt($receptor, array("Rfc"=>"TUCA2107035N9",
+	satxmlsv33_cargaAtt($receptor, array("Rfc"=>"TUCA2107035N9",
 		"Nombre"=>"RAFAEL ALEJANDRO HERNANDEZ PALACIOS",
 		"UsoCFDI"=>"G01"
 ));
@@ -107,7 +108,7 @@ function satxmlsv33_conceptos($arr, $edidata, $dir, $nodo, $addenda){
 	$impuestos = $concepto->appendChild($impuestos);
 	$traslados = $xml->createElement("cfdi:Traslados");
 	$traslados = $impuestos->appendChild($traslados);
-	$traslado = $xml-ZcreateElement("cfdi:Traslado");
+	$traslado = $xml->createElement("cfdi:Traslado");
 	$traslado = $traslados->appendChild($traslado);
 	satxmlsv33_cargaAtt($traslado, array(
 		"Base"=>"22500.00",
@@ -149,7 +150,7 @@ function satxmlsv33_genera_cadena_original(){
 	$cadena_original = str_replace(array("\r", "\n"), '', $cadena_orifinal);
 }
 
-function satxmlsv33_sella($arr){
+function satxmlsv33_sello($arr){
 	global $root, $cadena_original, $sello;
 	$certificado = "30001000000400002434";
 	$file = "/home/jmora/Documentos/php_ws/EKU9003173C9.key.pem";
@@ -194,7 +195,7 @@ function satxmlsv33_cargaAtt(&$nodo, $attr){
 		$val = preg_replace('/\s\s+/',' ', $val);
 		$val = trim($val);
 		if(strlen($val)>0){
-			$val = urf8_encode(str_replace("|", "/", $val));
+			$val = utf8_encode(str_replace("|", "/", $val));
 			$nodo->setAttribute($key, $val);
 		}
 	}
