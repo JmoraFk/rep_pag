@@ -142,7 +142,8 @@ function satxmlsv33_genera_cadena_original(){
 	$paso = new DOMDocument;
 	$paso->loadXML($xml->saveXML());
 	$xsl = new DOMDocument();
-	$file = "/home/jmora/Documentos/php_ws/cadenaoriginal_3_3.xslt";
+	//$file = "/home/jmora/Documentos/php_ws/cadenaoriginal_3_3.xslt";
+	$file = "../3.3/cadenaoriginal_3_3.xslt";
 	$xsl->load($file);
 	$proc = new XSLTProcessor;
 	$proc->importStyleSheet($xsl);
@@ -153,7 +154,7 @@ function satxmlsv33_genera_cadena_original(){
 function satxmlsv33_sello($arr){
 	global $root, $cadena_original, $sello;
 	$certificado = "30001000000400002434";
-	$file = "/home/jmora/Documentos/php_ws/EKU9003173C9.key.pem";
+	$file = "../EKU/EKU9003173C9.key.pem";
 	$pdkeyid = openssl_get_privatekey(file_get_contents($file));
 	openssl_sign($cadena_original, $crypttext, $pdkeyid, OPENSSL_ALGO_SHA256);
 	openssl_free_key($pkeyid);
@@ -161,7 +162,7 @@ function satxmlsv33_sello($arr){
 	$sello = base64_encode($crypttext);
 	$root->setAttribute("Sello", $sello);
 
-	$file = "/home/jmora/Documentos/php_ws/EKU9003173C9.cer.pem";
+	$file = "../EKU/EKU9003173C9.cer.pem";
 	$datos = file($file);
 	$certificado = "";
 	$carga = false;
