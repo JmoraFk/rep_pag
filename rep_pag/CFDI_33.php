@@ -16,12 +16,14 @@ function satxmlsv33($arr, $edidata=false, $dir="", $nodo="", $addenda=""){
 function satxmlsv33_genera_xml($arr, $edidata, $dir, $nodo, $addenda){
 	global $xml, $ret;
 	$xml = new DOMdocument("1.0","UTF-8");
+	//AQUI SE DA EL ORDEN DE LOS NODOS
 	satxmlsv33_generales($arr, $edidata, $dir, $nodo, $addenda);
-	satxmlsv33_relacionados($arr, $edidata, $dir, $nodo, $addenda);
 	satxmlsv33_emisor($arr, $edidata, $dir, $nodo, $addenda);
+	satxmlsv33_relacionados($arr, $edidata, $dir, $nodo, $addenda);
 	satxmlsv33_receptor($arr, $edidata, $dir, $nodo, $addenda);
 	satxmlsv33_conceptos($arr, $edidata, $dir, $nodo, $addenda);
-	satxmlsv33_impuestos($arr, $edidata, $dir, $nodo, $addenda);
+	satxmlsv33_recep_pag($arr, $edidata, $dir, $nodo, $addenda);
+	// satxmlsv33_impuestos($arr, $edidata, $dir, $nodo, $addenda);
 }
 
 function satxmlsv33_generales($arr, $edidata, $dir, $nodo, $addenda){
@@ -39,7 +41,7 @@ function satxmlsv33_generales($arr, $edidata, $dir, $nodo, $addenda){
 		"Version"=>"3.3",
 		"Serie"=>"A",
 		"Folio"=>"167ABC",
-		"Fecha"=>date(Y-m-d). "T" .date("H:i:s"),
+		"Fecha"=>date("Y-m-d")."T".date("H:i:s"),
 		"Sello"=>"@",
 		"NoCertificado"=>"30001000000400002434",
 		"Certificado"=>"@",
@@ -60,7 +62,9 @@ function satxmlsv33_relacionados($arr, $edidata, $dir, $nodo, $addenda){
 	global $root, $xml;
 	$cfdis = $xml->createElement("cfdi:CfdiRelacionados");
 	$cfdis = $root->appendChild($cfdis);
-	satxmlsv33_cargaAtt($cfdis, array("TipoRelacion"=>"01"));
+	satxmlsv33_cargaAtt($cfdis, array(
+		"TipoRelacion"=>"01",
+	));
 	$cfdi = $xml->createElement("cfdi:Relacionado");
 	$cfdi = $cfdis->appendChild($cfdi);
 	satxmlsv33_cargaAtt($cfdi, array("UUID"=>""));
@@ -118,6 +122,49 @@ function satxmlsv33_conceptos($arr, $edidata, $dir, $nodo, $addenda){
 		"Importe"=>"3599.99"
 	));
 	}
+}
+
+function satxmlsv33_recep_pag($arr, $edidata, $dir, $nodo, $addenda){
+	global $root, $xml;
+	$complemento_pag = $xml->createElement("cfdi:Complemento");
+	$complemento_pag = $root->appendChild($complemento_pag);
+	$pag10_pagos = $xml->createElement("pago10:Pagos"); //PARA CREAR UN NODO EN EL DOCUMENTO ES NECESARIA ESTA LINEA DE CODIGO
+	$pag10_pagos = $complemento_pag->appendChild($pag10_pagos); //AÑADE LOS SUBNODOS DEL NODO
+	satxmlsv33_cargaAtt($pag10_pagos, array(
+		"Version"=>"1.0"
+	));
+
+	$pag10_pago = $xml->createElement("pago10:Pago");
+	$pag10_pago = $pag10_pagos->appendChild($pag10_pago);
+	satxmlsv33_cargaAtt($pag10_pago, array(
+		"FechaPago"=>date("Y-m-d")."T".date("H:i:s"),
+		"FormaDePagoP"=>"02",
+		"MonedaP"=>"USD",
+		"TipoCambioP"=>"18.68",
+		"Monto"=>"500.00",
+		"NumOperacion"=>"01",
+		"RfcEmisorCtaOrd"=>"XEXX010101000",
+		"NomBancoOrdExt"=>"BANCO",
+		"CtaOrdenante"=>"123456789101112131",
+		"RfcEmisorCtaBen"=>"MES420823153",
+		"CtaBeneficiario"=>"123456789101114558"
+	));
+
+	$pag10_docto_rel = $xml->createElement("pago10:DoctoRelacionado");
+	$pag10_docto_rel = $pag10_pago->appendChild($pag10_docto_rel);
+	satxmlsv33_cargaAtt($pag10_docto_rel, array(
+		"IdDocumento"=>"af1362AF-d3f4-ED30-b333-CEF2083FA390",
+		"Serie"=>"A4055",
+		"Folio"=>"2154",
+		"MonedaDR"=>"MXN",
+		"TipoCambioDR"=>"18.68",
+		"MetodoDePagoDR"=>"PPD",
+		"NumParcialidad"=>"2",
+		"ImpPagado"=>"500.00",
+		"ImpSaldoAnt"=>"1500.00",
+		"ImpSaldoInsoluto"=>"1000.00"
+	));
+	
 }
 
 function satxmlsv33_impuestos($arr, $edidata, $dir, $nodo, $addenda){
