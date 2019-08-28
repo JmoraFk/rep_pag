@@ -1,7 +1,7 @@
 <?php
 
 satxmlsv33(false, "", "", "");
-print_r("XML creado de manera satisfactoria!!!!\n");
+print_r("\nXML creado de manera satisfactoria!!!!\n");
 
 function satxmlsv33($arr, $edidata=false, $dir="", $nodo="", $addenda=""){
 	global $xml, $cadena_original, $sello, $texto, $ret;
@@ -16,7 +16,6 @@ function satxmlsv33($arr, $edidata=false, $dir="", $nodo="", $addenda=""){
 function satxmlsv33_genera_xml($arr, $edidata, $dir, $nodo, $addenda){
 	global $xml, $ret;
 	$xml = new DOMdocument("1.0","UTF-8");
-	//AQUI SE DA EL ORDEN DE LOS NODOS
 	satxmlsv33_generales($arr, $edidata, $dir, $nodo, $addenda);
 	satxmlsv33_emisor($arr, $edidata, $dir, $nodo, $addenda);
 	satxmlsv33_receptor($arr, $edidata, $dir, $nodo, $addenda);
@@ -48,10 +47,8 @@ function satxmlsv33_generales($arr, $edidata, $dir, $nodo, $addenda){
 		"Certificado"=>"@",
 		"SubTotal"=>"0",
 		"Moneda"=>"XXX",
-		//"TipoCambio"=>"1",
 		"Total"=>"0",
 		"TipoDeComprobante"=>"P",
-		//"CondicionesDePago"=>"CONDICIONES",
 		"LugarExpedicion"=>"45079",
 	));
 }
@@ -108,8 +105,8 @@ function satxmlsv33_recep_pag($arr, $edidata, $dir, $nodo, $addenda){
 	global $root, $xml;
 	$complemento_pag = $xml->createElement("cfdi:Complemento");
 	$complemento_pag = $root->appendChild($complemento_pag);
-	$pag10_pagos = $xml->createElement("pago10:Pagos"); //PAsRA CREAR UN NODO EN EL DOCUMENTO ES NECESARIA ESTA LINEA DE CODIGO
-	$pag10_pagos = $complemento_pag->appendChild($pag10_pagos); //AÑADE LOS SUBNODOS DEL NODO
+	$pag10_pagos = $xml->createElement("pago10:Pagos");
+	$pag10_pagos = $complemento_pag->appendChild($pag10_pagos); 
 	satxmlsv33_cargaAtt($pag10_pagos, array(
 		"Version"=>"1.0"
 	));
@@ -169,14 +166,14 @@ function satxmlsv33_genera_cadena_original(){
 	$paso = new DOMDocument;
 	$paso->loadXML($xml->saveXML());
 	$xsl = new DOMDocument();
-	$file = "/../3.3/cadenaoriginal_3_3.xslt";
+	$file = "../3.3/cadenaoriginal_3_3.xslt";
 	$xsl->load($file);
 	$proc = new XSLTProcessor;
 	$proc->importStyleSheet($xsl);
 	$cadena_original = $proc->transformToXML($paso);
-	print_r($cadena_original);
 	$cadena_original = str_replace(array("\r", "\n"), '', $cadena_original);
-	//print_r($cadena_original);
+	//ELIMINAR ESTA LINEA DE CÓDIGO
+	print_r($cadena_original);
 }
 
 function satxmlsv33_sello($arr){
@@ -195,13 +192,11 @@ function satxmlsv33_sello($arr){
 	$certificado = "";
 	$carga = false;
 	for ($i=0; $i <sizeof($datos) ; $i++) { 
-		# code..
 		if(strstr($datos[$i], "END CERTIFICATE")) $carga=false;
 		if($carga) $certificado .= trim($datos[$i]);
 		if(strstr($datos[$i], "BEGIN CERTIFICATE")) $carga=true;
 	}
 	$root->setAttribute("Certificado", $certificado);
-	//print_r($sello);
 }
 
 function satxmlsv33_termina($arr, $dir){
@@ -213,14 +208,12 @@ function satxmlsv33_termina($arr, $dir){
 	$xml->formatOutput=true;
 	$file=$dir.".xml";
 	$xml->save($file);
-
 	return $todo;
 }
 
 function satxmlsv33_cargaAtt(&$nodo, $attr){
 	$quitar = array('sello'=>1, 'noCertificado'=>1, 'certificado'=>1);
 	foreach ($attr as $key => $val) {
-		# code...
 		$val = preg_replace('/\s\s+/',' ', $val);
 		$val = trim($val);
 		if(strlen($val)>0){
