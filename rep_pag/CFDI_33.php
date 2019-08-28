@@ -1,7 +1,6 @@
 <?php
 
 satxmlsv33(false, "", "", "");
-print_r("\nXML creado de manera satisfactoria!!!!\n");
 
 function satxmlsv33($arr, $edidata=false, $dir="", $nodo="", $addenda=""){
 	global $xml, $cadena_original, $sello, $texto, $ret;
@@ -19,10 +18,8 @@ function satxmlsv33_genera_xml($arr, $edidata, $dir, $nodo, $addenda){
 	satxmlsv33_generales($arr, $edidata, $dir, $nodo, $addenda);
 	satxmlsv33_emisor($arr, $edidata, $dir, $nodo, $addenda);
 	satxmlsv33_receptor($arr, $edidata, $dir, $nodo, $addenda);
-	//satxmlsv33_relacionados($arr, $edidata, $dir, $nodo, $addenda);
 	satxmlsv33_conceptos($arr, $edidata, $dir, $nodo, $addenda);
-	satxmlsv33_recep_pag($arr, $edidata, $dir, $nodo, $addenda);
-	//satxmlsv33_impuestos($arr, $edidata, $dir, $nodo, $addenda);
+	satxmlsv33_recep_pag($arr, $edidata, $dir, $nodo);
 }
 
 function satxmlsv33_generales($arr, $edidata, $dir, $nodo, $addenda){
@@ -43,7 +40,7 @@ function satxmlsv33_generales($arr, $edidata, $dir, $nodo, $addenda){
 		"Folio"=>"167ABC",
 		"Fecha"=>date("Y-m-d")."T".date("H:i:s"),
 		"Sello"=>"@",
-		"NoCertificado"=>"30001000000400002434",
+		"NoCertificado"=>no_Certificado(),
 		"Certificado"=>"@",
 		"SubTotal"=>"0",
 		"Moneda"=>"XXX",
@@ -51,18 +48,6 @@ function satxmlsv33_generales($arr, $edidata, $dir, $nodo, $addenda){
 		"TipoDeComprobante"=>"P",
 		"LugarExpedicion"=>"45079",
 	));
-}
-
-function satxmlsv33_relacionados($arr, $edidata, $dir, $nodo, $addenda){
-	global $root, $xml;
-	$cfdis = $xml->createElement("cfdi:CfdiRelacionados");
-	$cfdis = $root->appendChild($cfdis);
-	satxmlsv33_cargaAtt($cfdis, array(
-		"TipoRelacion"=>"01",
-	));
-	$cfdi = $xml->createElement("cfdi:Relacionado");
-	$cfdi = $cfdis->appendChild($cfdi);
-	satxmlsv33_cargaAtt($cfdi, array("UUID"=>""));
 }
 
 function satxmlsv33_emisor($arr, $edidata, $dir, $nodo, $addenda){
@@ -101,7 +86,7 @@ function satxmlsv33_conceptos($arr, $edidata, $dir, $nodo, $addenda){
 	));
 }
 
-function satxmlsv33_recep_pag($arr, $edidata, $dir, $nodo, $addenda){
+function satxmlsv33_recep_pag($arr, $edidata, $dir, $nodo){
 	global $root, $xml;
 	$complemento_pag = $xml->createElement("cfdi:Complemento");
 	$complemento_pag = $root->appendChild($complemento_pag);
@@ -114,7 +99,8 @@ function satxmlsv33_recep_pag($arr, $edidata, $dir, $nodo, $addenda){
 	$pag10_pago = $xml->createElement("pago10:Pago");
 	$pag10_pago = $pag10_pagos->appendChild($pag10_pago);
 	satxmlsv33_cargaAtt($pag10_pago, array(
-		"FechaPago"=>date("Y-m-d")."T".date("H:i:s"),
+		//"FechaPago"=>date("Y-m-d")."T".date("H:i:s"),
+		"FechaPago"=>"2019-08-26T10:00:00",
 		"FormaDePagoP"=>"02",
 		"MonedaP"=>"USD",
 		"TipoCambioP"=>"18.68",
@@ -130,11 +116,11 @@ function satxmlsv33_recep_pag($arr, $edidata, $dir, $nodo, $addenda){
 	$pag10_docto_rel = $xml->createElement("pago10:DoctoRelacionado");
 	$pag10_docto_rel = $pag10_pago->appendChild($pag10_docto_rel);
 	satxmlsv33_cargaAtt($pag10_docto_rel, array(
-		"IdDocumento"=>"af1362AF-d3f4-ED30-b333-CEF2083FA390",
+		"IdDocumento"=>"4DB50C7A-F2BC-465E-B8C6-A86322166D87",
+		"TipoCambioDR"=>"18.68",
 		"Serie"=>"A4055",
 		"Folio"=>"2154",
 		"MonedaDR"=>"MXN",
-		"TipoCambioDR"=>"18.68",
 		"MetodoDePagoDR"=>"PPD",
 		"NumParcialidad"=>"2",
 		"ImpPagado"=>"500.00",
@@ -144,21 +130,19 @@ function satxmlsv33_recep_pag($arr, $edidata, $dir, $nodo, $addenda){
 	
 }
 
-function satxmlsv33_impuestos($arr, $edidata, $dir, $nodo, $addenda){
-	global $root, $xml;
-	$impuestos = $xml->createElement("cfdi:Impuestos");
-	$impuestos = $root->appendChild($impuestos);
-
-	$traslados = $xml->createElement("cfdi:Traslados");
-	$traslados = $impuestos->appendChild($traslados);
-	$traslado = $xml->createElement("cfdi:Traslado");
-	$traslado = $traslados->appendChild($traslado);
-	satxmlsv33_cargaAtt($traslado, array("Impuesto"=>"002",
-		"TipoFactor"=>"Tasa",
-		"TasaOCuota"=>"0.160000",
-		"Importe"=>"3599.99"
-	));
-	$impuestos->setAttribute("TotalImpuestosTrasladados", "3599.99");
+function no_Certificado(){
+	$cer = "../EKU/EKU9003173C9.cer"; //Ruta del archivo .cer
+	$noCertificado = shell_exec("openssl x509 -inform DER -in ". $cer ." -noout -serial");
+	$noCertificado = str_replace(' ', ' ', $noCertificado);
+	$arr1 = str_split($noCertificado);
+	$certificado = '';
+	for ($i=7; $i < count($arr1) ; $i++) { 
+		# code...
+		if($i%2==0){
+			$certificado = ($certificado.($arr1[$i]));
+		}
+	}
+	return $certificado;
 }
 
 function satxmlsv33_genera_cadena_original(){
@@ -166,28 +150,25 @@ function satxmlsv33_genera_cadena_original(){
 	$paso = new DOMDocument;
 	$paso->loadXML($xml->saveXML());
 	$xsl = new DOMDocument();
-	$file = "../3.3/cadenaoriginal_3_3.xslt";
+	$file = "../3.3/cadenaoriginal_3_3.xslt";//Ruta del archivo .xslt
 	$xsl->load($file);
 	$proc = new XSLTProcessor;
 	$proc->importStyleSheet($xsl);
 	$cadena_original = $proc->transformToXML($paso);
 	$cadena_original = str_replace(array("\r", "\n"), '', $cadena_original);
-	//ELIMINAR ESTA LINEA DE CÓDIGO
-	print_r($cadena_original);
 }
 
 function satxmlsv33_sello($arr){
 	global $root, $cadena_original, $sello;
-	$certificado = "30001000000400002434";
-	$file = "../EKU/EKU9003173C9.key.pem";
-	print_r($cadena_original);
+	$certificado = no_Certificado();
+	$file = "../EKU/EKU9003173C9.key.pem";//Ruta del archivo .key en formato .pem
 	$pdkeyid = openssl_get_privatekey(file_get_contents($file));
 	openssl_sign($cadena_original, $crypttext, $pdkeyid, OPENSSL_ALGO_SHA256);
 	openssl_free_key($pdkeyid);
 
 	$sello = base64_encode($crypttext);
 	$root->setAttribute("Sello", $sello);
-	$file = "../EKU/EKU9003173C9.cer.pem";
+	$file = "../EKU/EKU9003173C9.cer.pem";//CRuta del archivo .cer en formato .pem
 	$datos = file($file);
 	$certificado = "";
 	$carga = false;
@@ -204,7 +185,7 @@ function satxmlsv33_termina($arr, $dir){
 	$xml->formatOutput = true;
 	$todo = $xml->saveXML();
 	$paso = $todo;
-	file_put_contents("todo.xml", $todo);
+	file_put_contents("Recepcion_Pagos.xml", $todo);//Nombre del archivo xml generado
 	$xml->formatOutput=true;
 	$file=$dir.".xml";
 	$xml->save($file);
